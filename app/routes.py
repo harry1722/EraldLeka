@@ -1,5 +1,4 @@
 import os
-import time
 from flask import render_template, request, flash, redirect, session, url_for
 from app import app, db
 from app.models import Message, Project
@@ -85,7 +84,7 @@ def projects():
 
         title = form.title.data
         description = form.description.data
-        uploaded_files = request.files.getlist('folder[]')  # ndryshuar nga 'files' në 'folder[]'
+        uploaded_files = request.files.getlist('folder[]')
 
         if not uploaded_files or any(file.filename == '' or not allowed_file(file.filename) for file in uploaded_files):
             flash("Only certain file types are allowed and files must have a name!", "danger")
@@ -96,21 +95,18 @@ def projects():
 
         saved_files = []
         for file in uploaded_files:
-            # file.filename përmban edhe path-in relative, p.sh "subfolder/index.html"
-            # Ruaj këtë path për të mbajtur strukturën
-
-            # Për siguri ndaj path traversal, merr vetëm pjesën relative
+            # Siguro rrugën relative (sanitize)
             safe_path = os.path.normpath(file.filename)
-            # Ruaj full path me folder bazë
+            # Mos lejo që të kalojë jashtë folderit (p.sh ../../file)
+            if safe_path.startswith('..'):
+                flash("Invalid file path detected!", "danger")
+                return redirect(url_for('projects'))
+
             full_path = os.path.join(upload_folder, safe_path)
 
-            # Bëj siguri që folderi ekziston përpara se të ruash file
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
-
-            # Ruaj skedarin në disk
             file.save(full_path)
 
-            # Ruaj path-in relative në DB
             saved_files.append(safe_path)
 
         new_project = Project(
@@ -167,14 +163,26 @@ def delete_project(project_id):
 
     return redirect(url_for('projects'))
 
+
+# --- Ndërtimi i strukturës folder + files ---
+
+def insert_into_tree(tree, path):
+    parts = path.split('/', 1)
+    if len(parts) == 1:
+        tree.setdefault('files', []).append(parts[0])
+    else:
+        folder, rest = parts
+        if 'folders' not in tree:
+            tree['folders'] = {}
+        if folder not in tree['folders']:
+            tree['folders'][folder] = {}
+        insert_into_tree(tree['folders'][folder], rest)
+    return tree
+
 def build_file_structure(filenames):
     tree = {}
     for fname in filenames:
-        parts = fname.split('_', 1)
-        if len(parts) != 2:
-            continue
-        filename = parts[1]
-        tree.setdefault('files', []).append(filename)
+        insert_into_tree(tree, fname)
     return tree
 
 def loop_structure(tree):
@@ -187,6 +195,7 @@ def loop_structure(tree):
         for file in tree['files']:
             html += f'<li class="file">{file}</li>'
     return html
+
 
 @app.route('/project_detail/<int:project_id>')
 def project_detail(project_id):
