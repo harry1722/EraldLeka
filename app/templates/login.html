@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 3rem auto; background:#1e293b; padding: 2rem; border-radius: 8px; color: #f1f5f9;">
+  <h2 style="text-align:center; margin-bottom:1rem; color:#60a5fa;">Login</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="{% if category == 'success' %}success-message{% else %}error-message{% endif %} flash-message" style="margin-bottom: 1rem;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    
+    <div style="margin-bottom:1rem;">
+      {{ form.username.label }}
+      {{ form.username(class_='input-field') }}
+      {% for error in form.username.errors %}
+        <div style="color: #f87171;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div style="margin-bottom:1rem;">
+      {{ form.password.label }}
+      {{ form.password(class_='input-field') }}
+      {% for error in form.password.errors %}
+        <div style="color: #f87171;">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div>
+      {{ form.submit(class_='btn') }}
+    </div>
+  </form>
+</div>
+
+<style>
+.success-message {
+    color: #22c55e;
+    font-weight: bold;
+    text-align: center;
+}
+.error-message {
+    color: #ef4444;
+    font-weight: bold;
+    text-align: center;
+}
+.input-field {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: none;
+    margin-top: 0.3rem;
+    font-size: 1rem;
+}
+.btn {
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.7rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1.1rem;
+}
+.btn:hover {
+    background-color: #2563eb;
+}
+</style>
+<script>
+  // Fsheh mesazhet flash pas 1 sekonde (1000 ms)
+  setTimeout(function() {
+    document.querySelectorAll('.flash-message').forEach(function(el) {
+      el.style.display = 'none';
+    });
+  }, 2000);
+</script>
+{% endblock %}

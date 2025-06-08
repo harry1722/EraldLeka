@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  body {
+    background-color: #0f172a;
+    font-family: 'Orbitron', sans-serif;
+    color: #f1f5f9;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 1rem;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #38bdf8;
+    margin-bottom: 2rem;
+  }
+
+  .file-tree {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  ul {
+    list-style-type: none;
+    padding-left: 1rem;
+    margin: 0;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+
+  .folder {
+    font-weight: bold;
+    color: #60a5fa;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .folder .arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+
+  .folder[aria-expanded="true"] .arrow {
+    transform: rotate(90deg);
+  }
+
+  .file {
+    color: #cbd5e1;
+    margin-left: 1.8rem;
+  }
+
+  .folder-contents {
+    padding-left: 1.5rem;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s ease;
+  }
+
+  .folder-contents.open {
+    max-height: 2000px;
+  }
+
+  .back-btn {
+    display: inline-block;
+    margin-bottom: 2rem;
+    padding: 0.5rem 1rem;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+  }
+
+  .back-btn:hover {
+    background-color: #2563eb;
+  }
+</style>
+
+<div class="container">
+  <a href="{{ url_for('projects') }}" class="back-btn">⬅️ Back to Projects</a>
+
+  <h1>{{ project.title }}</h1>
+  <p style="margin-bottom: 2rem;">{{ project.description }}</p>
+
+  <div class="file-tree">
+    <h2 style="color: #38bdf8; margin-bottom: 1rem;">📁 Files & Folders</h2>
+    <ul>
+      {% if file_structure %}
+        {{ loop_structure(file_structure) | safe }}
+      {% else %}
+        <li>No files uploaded yet.</li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.folder').forEach(folder => {
+    folder.setAttribute('aria-expanded', 'false');
+    const contents = folder.nextElementSibling;
+    if(contents) contents.style.maxHeight = null;
+
+    folder.addEventListener('click', () => {
+      const isOpen = folder.getAttribute('aria-expanded') === 'true';
+      folder.setAttribute('aria-expanded', String(!isOpen));
+      if(contents) {
+        if(!isOpen) {
+          contents.classList.add('open');
+        } else {
+          contents.classList.remove('open');
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

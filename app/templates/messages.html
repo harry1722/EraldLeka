@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="mb-4">Visitor Messages</h1>
+
+{% if messages %}
+    <ul class="list-group">
+        {% for msg in messages %}
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <strong>{{ msg.name }} ({{ msg.profession }})</strong>
+                <small class="text-muted">{{ msg.time.strftime('%Y-%m-%d %H:%M') }}</small>
+            </div>
+            <p class="mt-2">{{ msg.message }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p class="text-muted">No messages yet.</p>
+{% endif %}
+{% endblock %}

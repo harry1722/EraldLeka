@@ -1,0 +1,1 @@
+This is a portfolio. A project that helps to improve front-end and backend  skills using frameworks like Flask.

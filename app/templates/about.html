@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    .about-section {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 1.5rem;
+        background: #121827;
+        border-radius: 12px;
+        color: #c0c7d6;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+    }
+    .about-section h2 {
+        color: #00ffe7;
+        margin-bottom: 1rem;
+    }
+    .about-section p {
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main>
+    <section class="about-section">
+        <h2>About Me</h2>
+        <p>
+            Hey! I'm Erald Leka, a dedicated IT student passionate about programming, web development, and technology innovation.
+            I love solving problems through code and continuously learning new skills to stay ahead in this fast-paced digital world.
+        </p>
+        <p>
+            Currently, I'm working on improving my frontend and backend skills by building real projects, and sharing my journey online.
+            When I'm not coding, you can find me exploring new tech trends, listening to music, or enjoying a good movie.
+        </p>
+    </section>
+</main>
+{% endblock %}

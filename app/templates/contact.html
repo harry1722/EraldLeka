@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  rel="stylesheet"
+/>
+
+<style>
+  form {
+    max-width: 500px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
+  }
+  label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+    color: #222;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  textarea {
+    resize: vertical;
+  }
+  button {
+    display: inline-block;
+    width: 100%;
+    padding: 12px 0;
+    background-color: #007BFF;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 6px 12px rgba(0, 86, 179, 0.6);
+  }
+  ul.flashes {
+    max-width: 500px;
+    margin: 10px auto;
+    padding: 0;
+    list-style: none;
+  }
+  ul.flashes li.success {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  /* Social links container */
+  .social-contact {
+    max-width: 500px;
+    margin: 30px auto 50px;
+    text-align: center;
+  }
+  .social-contact p {
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+  .social-contact a {
+    margin: 0 15px;
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.6rem;
+    transition: color 0.3s ease;
+  }
+  .social-contact a:hover {
+    color: #0056b3;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Contact Me</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<form method="POST" action="{{ url_for('contact') }}">
+  {{ form.hidden_tag() }}
+
+  <p>
+    {{ form.name.label }}<br>
+    {{ form.name(class="form-control") }}
+  </p>
+  <p>
+    {{ form.profession.label }}<br>
+    {{ form.profession(class="form-control") }}
+  </p>
+  <p>
+    {{ form.message.label }}<br>
+    {{ form.message(class="form-control") }}
+  </p>
+  <p>{{ form.submit(class="btn btn-primary") }}</p>
+</form>
+
+<div class="social-contact">
+  <p>Contact me on social media or email:</p>
+  <a href="mailto:your.email@example.com" target="_blank" rel="noopener" title="Email">
+    <i class="fas fa-envelope"></i>
+  </a>
+  <a href="https://instagram.com/yourprofile" target="_blank" rel="noopener" title="Instagram">
+    <i class="fab fa-instagram"></i>
+  </a>
+  <a href="https://wa.me/1234567890" target="_blank" rel="noopener" title="WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+  <a href="https://github.com/yourusername" target="_blank" rel="noopener" title="GitHub">
+    <i class="fab fa-github"></i>
+  </a>
+</div>
+{% endblock %}
