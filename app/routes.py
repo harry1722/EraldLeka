@@ -78,7 +78,6 @@ def logout():
 @app.route('/projects', methods=['GET', 'POST'])
 def projects():
     form = ProjectForm()
-
     if form.validate_on_submit():
         if session.get('user') != 'admin':
             flash('Access denied', 'danger')
@@ -86,7 +85,7 @@ def projects():
 
         title = form.title.data
         description = form.description.data
-        uploaded_files = request.files.getlist('files')
+        uploaded_files = request.files.getlist('folder[]')  # ndryshuar nga 'files' në 'folder[]'
 
         if not uploaded_files or any(file.filename == '' or not allowed_file(file.filename) for file in uploaded_files):
             flash("Only certain file types are allowed and files must have a name!", "danger")
@@ -97,10 +96,22 @@ def projects():
 
         saved_files = []
         for file in uploaded_files:
-            filename = f"{int(time.time())}_{secure_filename(file.filename)}"
-            file_path = os.path.join(upload_folder, filename)
-            file.save(file_path)
-            saved_files.append(filename)
+            # file.filename përmban edhe path-in relative, p.sh "subfolder/index.html"
+            # Ruaj këtë path për të mbajtur strukturën
+
+            # Për siguri ndaj path traversal, merr vetëm pjesën relative
+            safe_path = os.path.normpath(file.filename)
+            # Ruaj full path me folder bazë
+            full_path = os.path.join(upload_folder, safe_path)
+
+            # Bëj siguri që folderi ekziston përpara se të ruash file
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+            # Ruaj skedarin në disk
+            file.save(full_path)
+
+            # Ruaj path-in relative në DB
+            saved_files.append(safe_path)
 
         new_project = Project(
             title=title,
