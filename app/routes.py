@@ -84,7 +84,7 @@ def projects():
 
         title = form.title.data
         description = form.description.data
-        uploaded_files = request.files.getlist('folder[]')
+        uploaded_files = request.files.getlist('files')
 
         if not uploaded_files or any(file.filename == '' or not allowed_file(file.filename) for file in uploaded_files):
             flash("Only certain file types are allowed and files must have a name!", "danger")
