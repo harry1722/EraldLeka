@@ -37,7 +37,17 @@
 
   .project p {
     color: #cbd5e1;
+    margin-bottom: 0.5rem;
+  }
+
+  .project ul {
+    padding-left: 1.2rem;
     margin-bottom: 1rem;
+    color: #94a3b8;
+  }
+
+  .project li {
+    list-style-type: disc;
   }
 
   .view-btn {
@@ -186,7 +196,7 @@
         {{ form.description(class="input-field", id=form.description.id) }}
 
         <label for="folderInput">Upload Folder</label>
-        <input type="file" id="folderInput" name="folder[]" multiple>
+        <input type="file" id="folderInput" name="folder[]" webkitdirectory directory multiple>
 
         <button type="submit" class="submit-btn">Add Project</button>
       </form>
@@ -197,6 +207,21 @@
     <div class="project">
       <h2>{{ project.title }}</h2>
       <p>{{ project.description }}</p>
+
+      {% if project.files %}
+        <p><strong>Files:</strong> {{ project.files|length }} uploaded</p>
+        <ul>
+          {% for file in project.files[:3] %}
+            <li>{{ file.filename }}</li>
+          {% endfor %}
+          {% if project.files|length > 3 %}
+            <li>...and more</li>
+          {% endif %}
+        </ul>
+      {% else %}
+        <p><em>No files uploaded.</em></p>
+      {% endif %}
+
       <a href="{{ url_for('project_detail', project_id=project.id) }}" class="view-btn">View Files</a>
     </div>
   {% endfor %}
