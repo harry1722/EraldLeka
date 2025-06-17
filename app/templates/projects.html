@@ -186,19 +186,19 @@
     <div>
       <span class="close-icon" id="closeIcon">❌</span>
       <h2>Add New Project</h2>
-      <form id="upload-form" enctype="multipart/form-data" >
+      <form id="upload-form" enctype="multipart/form-data">
         <label for="projectTitle">Project Name</label>
         <input type="text" id="projectTitle" name="title" required>
 
         <label for="projectDesc">Description</label>
-        <textarea name="description" id="projectDesc" rows="3" required></textarea>
+        <textarea id="projectDesc" name="description" rows="3" required></textarea>
 
         <label for="folderInput">Upload Folder</label>
-        <input type="file" id="folderInput" name="files[]" webkitdirectory directory multiple>
+        <input type="file" id="folderInput" name="files[]" webkitdirectory directory multiple required>
 
         <button type="submit" class="submit-btn">Add Project</button>
       </form>
-      <di id="update-status"></div>
+      <div id="upload-status"></div>
     </div>
   </div>
 
@@ -249,29 +249,31 @@
     }
   });
 
-  // AJAX Upload
-   const uploadForm = document.getElementById('upload-form');
+  // AJAX upload
+  const uploadForm = document.getElementById('upload-form');
   const statusDiv = document.getElementById('upload-status');
 
- uploadForm.addEventListener('submit', async (e) => {
+  uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     statusDiv.textContent = 'Uploading...';
 
     const formData = new FormData(uploadForm);
-     try {
+
+    try {
       const response = await fetch('/upload', {
         method: 'POST',
         body: formData
       });
+
       if (response.ok) {
         const data = await response.json();
         statusDiv.textContent = data.message;
         setTimeout(() => window.location.reload(), 1500);
-      }else{
-        statusDiv.textContent = 'Upload failed';
+      } else {
+        statusDiv.textContent = 'Upload failed.';
       }
-    }catch(error){
-      statusDiv.textContent = 'Error during ulpload'
+    } catch (error) {
+      statusDiv.textContent = 'Error during upload.';
     }
   });
 </script>
