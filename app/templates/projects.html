@@ -186,20 +186,19 @@
     <div>
       <span class="close-icon" id="closeIcon">❌</span>
       <h2>Add New Project</h2>
-      <form method="POST" enctype="multipart/form-data" action="{{ url_for('projects') }}">
-        {{ form.hidden_tag() }}
+      <form id="upload-form" enctype="multipart/form-data" >
+        <label for="projectTitle">Project Name</label>
+        <input type="text" id="projectTitle" name="title" required>
 
-        <label for="{{ form.title.id }}">Project Name</label>
-        {{ form.title(class="input-field", id=form.title.id) }}
-
-        <label for="{{ form.description.id }}">Description</label>
-        {{ form.description(class="input-field", id=form.description.id) }}
+        <label for="projectDesc">Description</label>
+        <textarea name="description" id="projectDesc" rows="3" required></textarea>
 
         <label for="folderInput">Upload Folder</label>
-        <input type="file" id="folderInput" name="files" webkitdirectory directory multiple>
+        <input type="file" id="folderInput" name="files[]" webkitdirectory directory multiple>
 
         <button type="submit" class="submit-btn">Add Project</button>
       </form>
+      <di id="update-status"></div>
     </div>
   </div>
 
@@ -247,6 +246,32 @@
   window.addEventListener('click', (e) => {
     if (e.target === projectModal) {
       projectModal.style.display = 'none';
+    }
+  });
+
+  // AJAX Upload
+   const uploadForm = document.getElementById('upload-form');
+  const statusDiv = document.getElementById('upload-status');
+
+ uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    statusDiv.textContent = 'Uploading...';
+
+    const formData = new FormData(uploadForm);
+     try {
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+      if (response.ok) {
+        const data = await response.json();
+        statusDiv.textContent = data.message;
+        setTimeout(() => window.location.reload(), 1500);
+      }else{
+        statusDiv.textContent = 'Upload failed';
+      }
+    }catch(error){
+      statusDiv.textContent = 'Error during ulpload'
     }
   });
 </script>
