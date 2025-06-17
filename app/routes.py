@@ -1,3 +1,4 @@
+from functools import wraps
 import os
 from flask import (
     abort, render_template, request, flash, redirect, send_from_directory, 
@@ -17,6 +18,18 @@ ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 ALLOWED_EXTENSIONS = {'pdf', 'docx', 'txt', 'png', 'jpg', 'jpeg', 'zip', 'py', 'html', 'css', 'js'}
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get('user') != 'admin':
+            if request.is_json or request.method in ['POST','DELETE','PUT']:
+                return jsonify({'success':False, 'error':'Unauthorazied'}), 403
+            
+            flash("Access denied","danger")
+            return redirect(url_for('login'))
+        return f(*args,**kwargs)
+    return decorated_function
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -50,18 +63,15 @@ def contact():
     return render_template('contact.html', form=form)
 
 @app.route('/messages')
+@admin_required
 def messages():
-    if session.get('user') != 'admin':
-        flash("Access denied", "danger")
-        return redirect(url_for('login'))
     messages = Message.query.order_by(Message.time.desc()).all()
     return render_template('messages.html', messages=messages)
 
 @app.route('/messages/delete/<int:msg_id>', methods=['POST'])
+@admin_required
 def delete_message(msg_id):
-    if session.get('user')!='admin':
-        return jsonify({'success':False, 'error':'Unauthorized'}),403
-    
+
     msg = Message.query.get(msg_id)
     if not msg:
         return jsonify({'success':False,'error':'Message not found'}),404
@@ -152,10 +162,8 @@ def build_file_structure(files):
 
 
 @app.route('/delete_project/<int:project_id>', methods=['DELETE'])
+@admin_required
 def delete_project(project_id):
-    if session.get('user') != 'admin':
-        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
-
     project = Project.query.get(project_id)
     if not project:
         return jsonify({'success':False,"error":'Project not found'})
