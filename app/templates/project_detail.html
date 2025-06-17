@@ -99,8 +99,9 @@
       {% if tree.files %}
         {% for file in tree.files %}
           <li class="file">
-            <a href="{{ url_for('download_file', project_id=project.id, filename=file) }}" target="_blank" rel="noopener noreferrer">{{ file }}</a>
-          </li>
+            <a href="{{ url_for('static', filename='uploads/' ~ file) }}" target="_blank" rel="noopener noreferrer">{{ file.split('/')[-1] }}</a>
+          </li> 
+
         {% endfor %}
       {% endif %}
     </ul>

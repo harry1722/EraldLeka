@@ -1,21 +1,100 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <h1 class="mb-4">Visitor Messages</h1>
 
 {% if messages %}
-    <ul class="list-group">
+<style>
+    table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px 12px;
+        border: 1px solid #aaa;
+        text-align: center;
+        vertical-align: middle;
+    }
+    th {
+        background-color: #f0f0f0;
+        color: black;
+    }
+    .delete-btn {
+        background: none;
+        border: none;
+        color: red;
+        cursor: pointer;
+        font-size: 18px;
+        margin-right: 8px;
+        vertical-align: middle;
+        padding: 0;
+        user-select: none;
+    }
+    .delete-btn:hover {
+        color: darkred;
+    }
+</style>
+
+<table id="messages-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Profession</th>
+            <th>Message</th>
+            <th>Date and Time</th>
+        </tr>
+    </thead>
+    <tbody>
         {% for msg in messages %}
-        <li class="list-group-item">
-            <div class="d-flex justify-content-between align-items-center">
-                <strong>{{ msg.name }} ({{ msg.profession }})</strong>
-                <small class="text-muted">{{ msg.time.strftime('%Y-%m-%d %H:%M') }}</small>
-            </div>
-            <p class="mt-2">{{ msg.message }}</p>
-        </li>
+        <tr data-id="{{ msg.id }}">
+            <td>
+                {% if session.get('user') == 'admin' %}
+                <button class="delete-btn" data-id="{{ msg.id }}" title="Delete Message">🗑️</button>
+                {% endif %}
+                {{ msg.id }}
+            </td>
+            <td>{{ msg.name }}</td>
+            <td>{{ msg.profession }}</td>
+            <td>{{ msg.message }}</td>
+            <td>{{ msg.time.strftime('%Y-%m-%d %H:%M') }}</td>
+        </tr>
         {% endfor %}
-    </ul>
+    </tbody>
+</table>
+
+<script>
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            if (confirm('Are you sure?')) {
+                fetch(`/messages/delete/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.success) {
+                        const row = btn.closest('tr');
+                        row.remove();
+                    } else {
+                        alert('Failed to delete');
+                    }
+                })
+                .catch(() => alert('Server error'));
+            }
+        });
+    });
+</script>
+
 {% else %}
-    <p class="text-muted">No messages yet.</p>
+<p class="text-muted">No messages yet.</p>
 {% endif %}
+
 {% endblock %}

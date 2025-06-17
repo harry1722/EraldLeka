@@ -29,10 +29,16 @@
     margin-bottom: 2rem;
   }
 
-  .project h2 {
-    font-size: 1.5rem;
-    color: #60a5fa;
-    margin-bottom: 0.5rem;
+  .project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .project-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #f1f5f9;
   }
 
   .project p {
@@ -57,49 +63,109 @@
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    transition: background 0.2s;
     text-decoration: none;
     display: inline-block;
+    transition: background 0.2s;
   }
 
   .view-btn:hover {
     background-color: #2563eb;
   }
 
-  #projectModal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6);
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+  .action-icons {
+    display: inline-flex;
+    gap: 0.5rem;
+    margin-left: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
-  #projectModal > div {
+  .edit-icon, .delete-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #60a5fa;
+  }
+
+  .project:hover .action-icons {
+    opacity: 1;
+  }
+
+  #openModalBtn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 999;
+    font-size: 2rem;
+    padding: 0.5rem 1rem;
+    background: #3b82f6;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    transition: background 0.3s;
+  }
+
+  #openModalBtn:hover {
+    background: #2563eb;
+  }
+
+  /* MODAL OVERLAY - Shared by all modals */
+  #projectModal,
+  #editModal,
+  #deleteModal {
+  display: none; /* fillimisht fshehur */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* e vendos ne qender saktësisht */
+  z-index: 1000;
+  }
+
+  /* SHARED MODAL CONTENT STYLE */
+  #projectModal > div,
+  #editModal > div,
+  .modal-content {
     background: #1e293b;
     padding: 1.5rem;
     border-radius: 8px;
-    max-width: 500px;
-    width: 90%;
+    width: auto;
+    height: auto;
     position: relative;
-  }
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    color: #f1f5f9;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;          
+    flex-direction: column;  
+    justify-content: center; 
+    align-items: center;
+}
 
-  #projectModal h2 {
+  
+
+  #projectModal h2,
+  #editModal h2,
+  .modal-content h2 {
     color: #60a5fa;
     text-align: center;
     margin-bottom: 1rem;
   }
 
-  #projectModal label {
+  #projectModal label,
+  #editModal label {
     display: block;
     margin-top: 0.8rem;
     color: #cbd5e1;
   }
 
   #projectModal input[type="text"],
+  #editModal input[type="text"],
   #projectModal textarea,
+  #editModal textarea,
   #projectModal input[type="file"] {
     width: 100%;
     margin-top: 0.3rem;
@@ -111,7 +177,9 @@
   }
 
   #projectModal button[type="submit"],
-  .submit-btn {
+  #editModal button[type="submit"],
+  .submit-btn,
+  .edit-submit-btn {
     background: #3b82f6;
     color: white;
     border: none;
@@ -120,6 +188,10 @@
     cursor: pointer;
     width: 100%;
     font-size: 1rem;
+  }
+
+  #editModal button[type="submit"] {
+    background: #38bdf8;
   }
 
   #projectModal button#closeModalBtn {
@@ -134,32 +206,41 @@
     font-size: 1rem;
   }
 
-  #openModalBtn {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 999;
-    font-size: 2rem;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    background: #3b82f6;
-    border: none;
-    border-radius: 50%;
-    color: white;
-    transition: background 0.3s;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-  }
-
-  #openModalBtn:hover {
-    background: #2563eb;
-  }
-
   .close-icon {
     position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 1.5rem;
-    color: #f87171;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.2rem;
+    color: #f1f5f9;
+    cursor: pointer;
+  }
+
+  .modal-content p {
+    margin-bottom: 1.5rem;
+    color: #cbd5e1;
+  }
+
+  .modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .modal-buttons .danger {
+    background-color: #ef4444;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .modal-buttons .cancel {
+    background-color: #334155;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
     cursor: pointer;
   }
 
@@ -181,7 +262,7 @@
     <button id="openModalBtn">＋</button>
   {% endif %}
 
-  <!-- Modal -->
+  <!-- Add Project Modal -->
   <div id="projectModal">
     <div>
       <span class="close-icon" id="closeIcon">❌</span>
@@ -202,9 +283,46 @@
     </div>
   </div>
 
+<!-- Edit Modal -->
+  <div id="editModal">
+    <div>
+      <span class="close-icon" id="closeEditIcon">❌</span>
+      <h2>Edit Project</h2>
+      <form id="edit-form" method="POST">
+        <label for="editTitle">Project Name</label>
+        <input type="text" id="editTitle" name="title" required>
+
+        <label for="editDescription">Description</label>
+        <textarea id="editDescription" name="description" rows="3" required></textarea>
+
+        <button type="submit" class="edit-submit-btn">Save Changes</button>
+      </form>
+    </div>
+  </div>
+ <!-- Modal për fshirje projekti -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content">
+    <span class="close-icon" id="closeDeleteModal">❌</span>
+    <h2>⚠️ Fshirje Projekti</h2>
+    <p>Are you sure to delete this project?This action cannot be undone!</p>
+    <div class="modal-buttons">
+      <button id="confirmDelete" class="danger">Yes</button>
+      <button id="cancelDelete" class="cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
   {% for project in projects %}
     <div class="project">
+      <div class="project-header">
       <h2>{{ project.title }}</h2>
+      {% if session.get('user') == 'admin' %}
+        <div class="action-icons">
+          <button class="edit-icon" data-id="{{ project.id }}" data-title="{{ project.title }}" data-description="{{ project.description }}">✏️</button>
+          <button class="delete-btn" data-project-id="{{ project.id }}">🗑️</button>
+        </div>
+    {% endif %}
+  </div>
       <p>{{ project.description }}</p>
 
       {% if project.files %}
@@ -230,6 +348,11 @@
   const openModalBtn = document.getElementById('openModalBtn');
   const projectModal = document.getElementById('projectModal');
   const closeIcon = document.getElementById('closeIcon');
+  const editModal = document.getElementById('editModal');
+  const closeEditIcon = document.getElementById('closeEditIcon');
+  const editForm = document.getElementById('edit-form');
+  const editTitle = document.getElementById('editTitle');
+  const editDescription = document.getElementById('editDescription');
 
   if(openModalBtn) {
     openModalBtn.addEventListener('click', () => {
@@ -243,13 +366,18 @@
     });
   }
 
+  if(closeEditIcon) {
+    closeEditIcon.addEventListener('click', () => {
+      editModal.style.display = 'none';
+    });
+  }
+
   window.addEventListener('click', (e) => {
-    if (e.target === projectModal) {
-      projectModal.style.display = 'none';
-    }
+    if (e.target === projectModal) projectModal.style.display = 'none';
+    if (e.target === editModal) editModal.style.display = 'none';
   });
 
-  // AJAX upload
+  // Upload form AJAX
   const uploadForm = document.getElementById('upload-form');
   const statusDiv = document.getElementById('upload-status');
 
@@ -276,5 +404,67 @@
       statusDiv.textContent = 'Error during upload.';
     }
   });
+
+  // Handle Edit
+  document.querySelectorAll('.edit-icon').forEach(button => {
+    button.addEventListener('click', () => {
+      const id = button.dataset.id;
+      const title = button.dataset.title;
+      const description = button.dataset.description;
+
+      editTitle.value = title;
+      editDescription.value = description;
+      editForm.action = `/update_project/${id}`;
+
+      editModal.style.display = 'flex';
+    });
+  });
+//DELETE MODAL
+
+
+
+  const deleteModal = document.getElementById('deleteModal');
+  const confirmDeleteBtn = document.getElementById('confirmDelete');
+  const cancelDeleteBtn = document.getElementById('cancelDelete');
+
+  let projectIdToDelete = null;
+
+  document.querySelectorAll('.delete-btn').forEach(btn =>{
+    btn.addEventListener('click', ()=>{
+      projectIdToDelete = btn.getAttribute('data-project-id');
+      deleteModal.style.display = 'block';
+    });
+  });
+  
+  cancelDeleteBtn.addEventListener('click',()=>{
+    deleteModal.style.display = 'none';
+    projectIdToDelete = null;
+  });
+
+  confirmDeleteBtn.addEventListener('click',()=>{
+    if(!projectIdToDelete) return;
+
+    fetch(`/delete_project/${projectIdToDelete}`,{
+      method:'DELETE',
+      headers:{
+        'Content-Type':'application/json'
+      }
+    }).then(res=>{
+      if(res.ok){
+        location.reload();
+      }else{
+        alert('Error deleting project');
+      }
+    });
+
+    deleteModal.style.display='none';
+    projectIdToDelete=null;
+  });
+  window.addEventListener('click', (e) => {
+  if (e.target === projectModal) projectModal.style.display = 'none';
+  if (e.target === editModal) editModal.style.display = 'none';
+  if (e.target === deleteModal) deleteModal.style.display = 'none';
+});
+
 </script>
 {% endblock %}
