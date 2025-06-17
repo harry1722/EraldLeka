@@ -303,7 +303,7 @@
 <div id="deleteModal" class="modal">
   <div class="modal-content">
     <span class="close-icon" id="closeDeleteModal">❌</span>
-    <h2>⚠️ Fshirje Projekti</h2>
+    <h2>⚠️ Delete Project</h2>
     <p>Are you sure to delete this project?This action cannot be undone!</p>
     <div class="modal-buttons">
       <button id="confirmDelete" class="danger">Yes</button>
@@ -460,6 +460,13 @@
     deleteModal.style.display='none';
     projectIdToDelete=null;
   });
+  const closeDeleteModal = document.getElementById('closeDeleteModal');
+
+  closeDeleteModal.addEventListener('click', () => {
+    deleteModal.style.display = 'none';
+    projectIdToDelete = null;
+  });
+
   window.addEventListener('click', (e) => {
   if (e.target === projectModal) projectModal.style.display = 'none';
   if (e.target === editModal) editModal.style.display = 'none';
