@@ -1,212 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}My Portfolio{% endblock %}</title>
+    <meta charset="UTF-8" />
+    <title>{% block title %}My Portfolio{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Google Fonts: Orbitron -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
+    <!-- Google Fonts: Orbitron -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
 
-  <style>
-    :root {
-      --bg-color: #0d1117;
-      --accent: #00f7ff;
-      --text-color: #e6f1ff;
-      --nav-hover: #161b22;
-    }
+    {% block head %}{% endblock %}
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --accent: #00f7ff;
+            --text-color: #e6f1ff;
+            --nav-hover: #161b22;
+        }
 
-    body {
-      font-family: 'Orbitron', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .menu {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 2rem;
-      background-color: var(--bg-color);
-      border-bottom: 1px solid var(--accent);
-      box-shadow: 0 2px 10px rgba(0, 247, 255, 0.1);
-      position: relative;
-      z-index: 1000;
-    }
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            /* Ruaj stilin qe ke ne kontakt ose ne pc */
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
 
-    .brand {
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: var(--accent);
-      user-select: none;
-    }
+        .menu {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--accent);
+            box-shadow: 0 2px 10px rgba(0, 247, 255, 0.1);
+            /* Ruaj gjerësinë si në pc */
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-    .nav-links {
-      display: flex;
-      gap: 1.5rem;
-    }
+        .brand {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
 
-    .nav-links a {
-      color: var(--text-color);
-      text-decoration: none;
-      font-weight: bold;
-      position: relative;
-      padding: 0.5rem 0;
-      transition: color 0.3s ease;
-      user-select: none;
-    }
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
 
-    .nav-links a::after {
-      content: "";
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 0%;
-      height: 2px;
-      background: var(--accent);
-      transition: width 0.3s ease;
-    }
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: bold;
+            position: relative;
+            padding: 0.5rem 0;
+            transition: color 0.3s ease;
+        }
 
-    .nav-links a:hover {
-      color: var(--accent);
-    }
+        .nav-links a::after {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
 
-    .nav-links a:hover::after {
-      width: 100%;
-    }
+        .nav-links a:hover {
+            color: var(--accent);
+        }
 
-    /* Hamburger */
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      justify-content: space-around;
-      width: 25px;
-      height: 25px;
-      cursor: pointer;
-      user-select: none;
-      z-index: 1100;
-    }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
 
-    .hamburger div {
-      width: 25px;
-      height: 3px;
-      background-color: var(--text-color);
-      border-radius: 2px;
-      transition: all 0.3s ease;
-      transform-origin: 1px;
-    }
+        /* Hamburger icon */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+        }
 
-    /* Animate hamburger to X when active */
-    .hamburger.active div:nth-child(1) {
-      transform: rotate(45deg);
-    }
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: var(--accent);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
 
-    .hamburger.active div:nth-child(2) {
-      opacity: 0;
-      transform: translateX(20px);
-    }
+        /* Media Queries për smartphone */
+        @media screen and (max-width: 768px) {
+            .menu {
+                padding: 1rem;
+                max-width: 100%;
+            }
 
-    .hamburger.active div:nth-child(3) {
-      transform: rotate(-45deg);
-    }
+            /* Nxjerr hamburger-in */
+            .hamburger {
+                display: flex;
+            }
 
-    /* Responsive */
-    @media screen and (max-width: 768px) {
-      .nav-links {
-        display: none;
-        position: absolute;
-        top: 60px;
-        right: 2rem;
-        flex-direction: column;
-        background-color: var(--bg-color);
-        width: 180px;
-        border: 1px solid var(--accent);
-        padding: 1rem;
-        border-radius: 6px;
-        box-shadow: 0 4px 10px rgba(0, 247, 255, 0.2);
-      }
+            /* Fshi menune default */
+            .nav-links {
+                position: absolute;
+                top: 60px;
+                right: 0;
+                background-color: var(--bg-color);
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+                padding: 1rem 2rem;
+                gap: 1rem;
+                box-shadow: -2px 2px 10px rgba(0, 247, 255, 0.2);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+            }
 
-      .nav-links.active {
-        display: flex;
-      }
-
-      .hamburger {
-        display: flex;
-      }
-    }
-
-    .content {
-      padding: 3rem 2rem;
-    }
-  </style>
+            /* Kur menu është aktive */
+            .nav-links.active {
+                transform: translateX(0);
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="menu">
+        <div class="brand">Erald</div>
 
-  <div class="menu">
-    <div class="brand">Harry</div>
+        <div class="hamburger" id="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
 
-    <nav class="nav-links" id="nav-links">
-      <a href="{{ url_for('home') }}">Home</a>
-      <a href="{{ url_for('about') }}">About</a>
-      <a href="{{ url_for('projects') }}">Projects</a>
+        <div class="nav-links" id="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('projects') }}">Projects</a>
 
-      {% if session.get('user') == 'admin' %}
-        <a href="{{ url_for('messages') }}">Messages</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
-      {% else %}
-        <a href="{{ url_for('contact') }}">Contact</a>
-        <a href="{{ url_for('login') }}">Login</a>
-      {% endif %}
-    </nav>
-
-    <div class="hamburger" id="hamburger" aria-label="Menu toggle" aria-expanded="false" role="button" tabindex="0">
-      <div></div>
-      <div></div>
-      <div></div>
+            {% if session.get('user') == 'admin' %}
+                <a href="{{ url_for('messages') }}">Messages</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('contact') }}">Contact</a>
+                <a href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+        </div>
     </div>
-  </div>
 
-  <div class="content">
-    {% block content %}{% endblock %}
-  </div>
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
 
-  <script>
-    const hamburger = document.getElementById('hamburger');
-    const navLinks = document.getElementById('nav-links');
+    <script>
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('nav-links');
 
-    function toggleMenu() {
-      hamburger.classList.toggle('active');
-      navLinks.classList.toggle('active');
-      // Update aria-expanded for accessibility
-      const expanded = hamburger.getAttribute('aria-expanded') === 'true';
-      hamburger.setAttribute('aria-expanded', String(!expanded));
-    }
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
 
-    hamburger.addEventListener('click', toggleMenu);
-
-    // Close menu if clicking outside
-    document.addEventListener('click', function(event) {
-      if (!navLinks.contains(event.target) && !hamburger.contains(event.target)) {
-        if(navLinks.classList.contains('active')) {
-          toggleMenu();
-        }
-      }
-    });
-
-    // Keyboard accessibility for hamburger (Enter/Space)
-    hamburger.addEventListener('keydown', function(event) {
-      if(event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        toggleMenu();
-      }
-    });
-  </script>
-
+        // Opsional: mbyll menun kur klikojmë në link
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        });
+    </script>
 </body>
 </html>
