@@ -244,6 +244,64 @@
     cursor: pointer;
   }
 
+  #uploadOverlay{
+    position: fixed;
+    top: 0;left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(13, 17, 23, 0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    flex-direction: column;
+    padding: 1rem;
+  }
+  .spinner{
+    width: 60px;
+    height: 60px;
+    border: 6px solid #00f7ff;
+    border-top: 6px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 2rem;
+  }
+
+  @keyframes spin{
+    to{
+      transform: rotate(360deg);
+    }
+  }
+
+  .emoji-done{
+    font-size: 4rem;
+    display: none;
+    animation: wink 1s ease-in-out forwards;
+    color: #00f7ff;
+  }
+
+  @keyframes wink{
+    0%{
+      transform: scale(0.2);
+      opacity: 0;
+    }
+    50%{
+      transform: scale(1.2);
+      opacity: 1;
+    }
+    100%{
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  .upload-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+
   @media (max-width: 600px) {
     .project h2 {
       font-size: 1.2rem;
@@ -282,6 +340,13 @@
       <div id="upload-status"></div>
     </div>
   </div>
+<div id="uploadOverlay">
+  <div class="upload-inner">
+    <div class="spinner"></div>
+    <div class="emoji-done">😉</div>
+  </div>
+</div>
+
 
 <!-- Edit Modal -->
   <div id="editModal">
@@ -303,7 +368,7 @@
 <div id="deleteModal" class="modal">
   <div class="modal-content">
     <span class="close-icon" id="closeDeleteModal">❌</span>
-    <h2>⚠️ Delete Project</h2>
+    <h2>⚠️ Fshirje Projekti</h2>
     <p>Are you sure to delete this project?This action cannot be undone!</p>
     <div class="modal-buttons">
       <button id="confirmDelete" class="danger">Yes</button>
@@ -381,26 +446,40 @@
   const uploadForm = document.getElementById('upload-form');
   const statusDiv = document.getElementById('upload-status');
 
+    const overlay = document.getElementById('uploadOverlay');
+    const spinner = document.querySelector('.spinner');
+    const emojiDone = document.querySelector('.emoji-done');
+
   uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    statusDiv.textContent = 'Uploading...';
+    overlay.style.display = 'flex';
+    spinner.style.display = 'block';
+    emojiDone.style.display = 'none';
+    statusDiv.textContent = '';
 
     const formData = new FormData(uploadForm);
 
-    try {
-      const response = await fetch('/upload', {
+      try {
+        const response = await fetch('/upload', {
         method: 'POST',
         body: formData
       });
-
       if (response.ok) {
-        const data = await response.json();
-        statusDiv.textContent = data.message;
-        setTimeout(() => window.location.reload(), 1500);
-      } else {
+        // Pas suksesit: fshi spinner, shfaq emoji
+        spinner.style.display = 'none';
+        emojiDone.style.display = 'block';
+
+        // Rifresko pas 1.5 sekondash
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          window.location.reload();
+        }, 1500);
+      }else {
+        overlay.style.display = 'none';
         statusDiv.textContent = 'Upload failed.';
       }
     } catch (error) {
+      overlay.style.display = 'none';
       statusDiv.textContent = 'Error during upload.';
     }
   });
@@ -420,8 +499,6 @@
     });
   });
 //DELETE MODAL
-
-
 
   const deleteModal = document.getElementById('deleteModal');
   const confirmDeleteBtn = document.getElementById('confirmDelete');
@@ -460,6 +537,7 @@
     deleteModal.style.display='none';
     projectIdToDelete=null;
   });
+
   const closeDeleteModal = document.getElementById('closeDeleteModal');
 
   closeDeleteModal.addEventListener('click', () => {
