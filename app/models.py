@@ -8,6 +8,7 @@ class Message(db.Model):
     profession = db.Column(db.String(100), nullable=False)
     message = db.Column(db.Text, nullable=False)
     time = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
 
 # --- Project Model ---
 class Project(db.Model):

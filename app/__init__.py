@@ -6,7 +6,6 @@ from config import Config
 import logging
 from logging.handlers import RotatingFileHandler
 
-
 app = Flask(__name__, static_folder='../static')
 app.config.from_object(Config)
 
@@ -30,6 +29,10 @@ file_handler.setLevel(logging.INFO)
 app.logger.addHandler(file_handler)
 app.logger.setLevel(logging.INFO)
 app.logger.info('App startup')
+
+from app.decoraters import unread_count
+
+app.context_processor(unread_count)
 
 
 from app import routes, models

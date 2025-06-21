@@ -1,4 +1,3 @@
-from functools import wraps
 import os
 from flask import (
     abort, render_template, request, flash, redirect, send_from_directory, 
@@ -11,6 +10,8 @@ from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from datetime import datetime
 import logging,shutil
+from app.decoraters import admin_required
+
 
 load_dotenv()
 
@@ -18,18 +19,6 @@ ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 ALLOWED_EXTENSIONS = {'pdf', 'docx', 'txt', 'png', 'jpg', 'jpeg', 'zip', 'py', 'html', 'css', 'js'}
-
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if session.get('user') != 'admin':
-            if request.is_json or request.method in ['POST','DELETE','PUT']:
-                return jsonify({'success':False, 'error':'Unauthorazied'}), 403
-            
-            flash("Access denied","danger")
-            return redirect(url_for('login'))
-        return f(*args,**kwargs)
-    return decorated_function
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -67,6 +56,16 @@ def contact():
 def messages():
     messages = Message.query.order_by(Message.time.desc()).all()
     return render_template('messages.html', messages=messages)
+
+@app.route('/messages/toggle_read/<int:msg_id>', methods=['POST'])
+@admin_required
+def toggle_read(msg_id):
+    msg = Message.query.get_or_404(msg_id)
+    msg.read = not msg.read
+    db.session.commit()
+    return jsonify({'success':True,'read':msg.read})
+    
+
 
 @app.route('/messages/delete/<int:msg_id>', methods=['POST'])
 @admin_required
