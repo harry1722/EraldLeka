@@ -4,7 +4,7 @@ from flask import (
     session, url_for, jsonify
 )
 from app import app, db
-from app.models import Message, Project, File
+from app.models import Message, Project
 from app.forms import LoginForm, ContactForm, ProjectForm
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
@@ -104,51 +104,58 @@ def logout():
 
 @app.route('/projects')
 def projects():
-    all_projects = Project.query.all()
-    return render_template('projects.html', projects=all_projects)
-
-@app.route('/project/<int:project_id>')
-def project_detail(project_id):
-    project = Project.query.get_or_404(project_id)
-    files = File.query.filter_by(project_id=project.id).all()
-    file_structure = build_file_structure(files)  # kjo funksion duhet të jetë në një utils/helper file
-    return render_template('project_detail.html', project=project, file_structure=file_structure)
+    projects = Project.query.all()
+    return render_template('projects.html', projects=projects)
 
 @app.route('/upload', methods=['POST'])
 def upload_project():
-    # merr title, description dhe file nga forma
     title = request.form.get('title')
     description = request.form.get('description')
-    files = request.files.getlist('files[]')  # vjen si multiple
+    link = request.form.get('link')
+    image = request.files.get('image')
 
-    # krijo projektin
-    project = Project(title=title, description=description)
-    db.session.add(project)
-    db.session.commit()
+    # Kontrollim fushash
+    if not title or not description or not image or not allowed_file(image.filename):
+        flash('Missing required fields or invalid image', 'danger')
+        return redirect(url_for('projects'))
 
-    for file in files:
-        filename = file.filename.replace("\\", "/")  # për ndarjen e folderave
-        save_path = os.path.join(app.static_folder, 'uploads', filename)
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        file.save(save_path)
+    filename = secure_filename(image.filename)
+    upload_folder = app.config['UPLOAD_FOLDER']
+    os.makedirs(upload_folder, exist_ok=True)
+    save_path = os.path.join(upload_folder, filename)
 
+    # Ruaj foton
+    image.save(save_path)
 
-        # ruaj në DB
-        file_entry = File(project_id=project.id, filename=filename)
-        db.session.add(file_entry)
+    # Krijo projektin në DB
+    project = Project(title=title, description=description, link=link, image=filename)
+    try:
+        db.session.add(project)
+        db.session.commit()
+        flash('Project added successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error saving project: {e}', 'danger')
+        logging.error(f"DB save error: {e}")
 
-    db.session.commit()
-    return jsonify({"message": "Project uploaded successfully."})
-
-@app.route('/update_project/<int:project_id>', methods=['POST'])
-def update_project(project_id):
-    project = Project.query.get_or_404(project_id)
-    project.title = request.form['title']
-    project.description = request.form['description']
-    db.session.commit()
     return redirect(url_for('projects'))
 
-def build_file_structure(files):
+@app.route('/update_project/<int:id>', methods=['POST'])
+def update_project(id):
+    project = Project.query.get_or_404(id)
+    project.title = request.form.get('title')
+    project.description = request.form.get('description')
+    project.link = request.form.get('link')
+    try:
+        db.session.commit()
+        flash('Project updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating project: {e}', 'danger')
+        logging.error(f"DB update error: {e}")
+    return redirect(url_for('projects'))
+
+
     tree = {'folders': {}, 'files': []}
     for f in files:
         parts = f.filename.split('/')
@@ -160,24 +167,17 @@ def build_file_structure(files):
     return tree
 
 
-@app.route('/delete_project/<int:project_id>', methods=['DELETE'])
-@admin_required
-def delete_project(project_id):
-    project = Project.query.get(project_id)
-    if not project:
-        return jsonify({'success':False,"error":'Project not found'})
-    
+@app.route('/delete_project/<int:id>', methods=['DELETE'])
+def delete_project(id):
+    project = Project.query.get_or_404(id)
     try:
-        project_folder = os.path.join(app.static_folder,'uploads', str(project_id))
-        if os.path.exists(project_folder):
-            shutil.rmtree(project_folder)
-
-        File.query.filter_by(project_id=project.id).delete()
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], project.image)
+        if os.path.exists(image_path):
+            os.remove(image_path)
         db.session.delete(project)
         db.session.commit()
-
-        return jsonify({'success':True})
+        return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error deleting project {project_id}:{e}")
-        return jsonify({'success':False, 'error':'DB error'}), 500
+        logging.error(f"Error deleting project {id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500

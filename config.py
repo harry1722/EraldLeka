@@ -2,7 +2,9 @@ import os
 from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-load_dotenv(os.path.join(basedir, '.env'))
+project_root = os.path.abspath(os.path.join(basedir, '..'))
+
+load_dotenv(os.path.join(project_root, '.env'))
 
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-if-not-set')
@@ -13,4 +15,6 @@ class Config:
 
     SQLALCHEMY_DATABASE_URI = db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    UPLOAD_FOLDER = os.path.join(basedir, os.getenv('UPLOAD_FOLDER', 'static/uploads'))
+
+    # Upload folder ku ruhen fotot
+    UPLOAD_FOLDER = os.path.join(project_root, 'static', 'uploads')
