@@ -11,12 +11,20 @@ from dotenv import load_dotenv
 from datetime import datetime
 import logging,shutil
 from app.decoraters import admin_required
+from io import BytesIO
+from supabase import create_client
+import time
 
 
 load_dotenv()
 
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 
 ALLOWED_EXTENSIONS = {'pdf', 'docx', 'txt', 'png', 'jpg', 'jpeg', 'zip', 'py', 'html', 'css', 'js'}
 
@@ -61,9 +69,9 @@ def messages():
 @admin_required
 def toggle_read(msg_id):
     msg = Message.query.get_or_404(msg_id)
-    msg.read = not msg.read
+    msg.is_read = not msg.is_read
     db.session.commit()
-    return jsonify({'success':True,'read':msg.read})
+    return jsonify({'success':True,'read':msg.is_read})
     
 
 
@@ -105,7 +113,18 @@ def logout():
 @app.route('/projects')
 def projects():
     projects = Project.query.all()
+    for project in projects:
+        if project.image:
+            url_response = supabase.storage.from_('images').get_public_url(project.image)
+            print('URL from Supabase:', url_response)  # Kjo duhet brenda if-it
+            project.public_url = url_response
+        else:
+            project.public_url = None
     return render_template('projects.html', projects=projects)
+
+
+
+
 
 @app.route('/upload', methods=['POST'])
 def upload_project():
@@ -114,20 +133,24 @@ def upload_project():
     link = request.form.get('link')
     image = request.files.get('image')
 
-    # Kontrollim fushash
     if not title or not description or not image or not allowed_file(image.filename):
         flash('Missing required fields or invalid image', 'danger')
         return redirect(url_for('projects'))
 
     filename = secure_filename(image.filename)
-    upload_folder = app.config['UPLOAD_FOLDER']
-    os.makedirs(upload_folder, exist_ok=True)
-    save_path = os.path.join(upload_folder, filename)
+    timestamp = int(time.time())
+    filename = f"{timestamp}_{filename}"
 
-    # Ruaj foton
-    image.save(save_path)
+    image_bytes = image.read()
 
-    # Krijo projektin në DB
+    try:
+        result = supabase.storage.from_('images').upload(filename, image_bytes)
+    except Exception as e:
+        flash(f'Gabim gjatë ngarkimit në Supabase: {e}', 'danger')
+        return redirect(url_for('projects'))
+
+    # Nëse arrijmë këtu, upload ka kaluar
+
     project = Project(title=title, description=description, link=link, image=filename)
     try:
         db.session.add(project)
@@ -136,7 +159,6 @@ def upload_project():
     except Exception as e:
         db.session.rollback()
         flash(f'Error saving project: {e}', 'danger')
-        logging.error(f"DB save error: {e}")
 
     return redirect(url_for('projects'))
 
@@ -156,24 +178,11 @@ def update_project(id):
     return redirect(url_for('projects'))
 
 
-    tree = {'folders': {}, 'files': []}
-    for f in files:
-        parts = f.filename.split('/')
-        current = tree
-        for part in parts[:-1]:  # gjithë folderat
-            current = current['folders'].setdefault(part, {'folders': {}, 'files': []})
-        # Shto path-in relative i plotë të file-it në 'files' list në këtë folder
-        current['files'].append(f.filename)
-    return tree
-
-
 @app.route('/delete_project/<int:id>', methods=['DELETE'])
 def delete_project(id):
     project = Project.query.get_or_404(id)
     try:
-        image_path = os.path.join(app.config['UPLOAD_FOLDER'], project.image)
-        if os.path.exists(image_path):
-            os.remove(image_path)
+        # Nëse dëshiron mund të shtosh edhe fshirjen e fotos nga Supabase këtu
         db.session.delete(project)
         db.session.commit()
         return jsonify({'success': True})

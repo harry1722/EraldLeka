@@ -280,9 +280,11 @@
           </div>
         {% endif %}
       </div>
-      {% if project.image %}
-        <img src="{{ url_for('static', filename='uploads/' ~ project.image) }}" alt="Project image" style="max-width:300px;">
-      {% endif %}
+    {% if project.public_url %}
+  <img src="{{ project.public_url }}" alt="Project image" class="project-image">
+{% endif %}
+
+
 
       <p>{{ project.description }}</p>
 
