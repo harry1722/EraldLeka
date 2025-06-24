@@ -48,12 +48,18 @@
   .project-link {
     margin-top: 0.5rem;
   }
-  .project-link a {
+  .project-link a,
+  .project p a {
     color: #22d3ee;
     text-decoration: underline;
     font-weight: 700;
     transition: color 0.3s ease;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    display: inline-block;
+    max-width: 100%;
   }
+
   .project-link a:hover {
     color: #06b6d4;
   }
